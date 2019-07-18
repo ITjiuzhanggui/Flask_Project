@@ -13,5 +13,6 @@ app.config.from_object(Config)
 # 插件数据库
 db = SQLAlchemy(app)
 
+
 if __name__ == '__main__':
     app.run(debug=True)
