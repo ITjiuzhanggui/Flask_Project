@@ -8,7 +8,6 @@ from flask_wtf.csrf import CSRFProtect
 
 from config import Config
 
-
 app = Flask(__name__)
 
 app.config.from_object(Config)
@@ -24,5 +23,3 @@ CSRFProtect(app)
 
 # 设置Flask_Session扩展，将存在浏览器的cookie中的session数据，同步到服务器的指定地址中(redis)
 Session(app)
-
-
