@@ -19,5 +19,12 @@ class Config(object):
     SESSION_USE_SIGNER = True  # 开启签名
     PERMANENT_SESSION_LIFETIME = 86400 * 7  # 设置过期时间
 
+
+class DevelopmentConfig(Config):
+    """开发模式下的配置"""
     DEBUG = True
 
+
+class ProductionConfig(Config):
+    """生产模式下的配置"""
+    DEBUG = False
