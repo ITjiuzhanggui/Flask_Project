@@ -1,5 +1,6 @@
 # 管理程序配置信息
 import redis
+import logging
 
 
 class Config(object):
@@ -23,8 +24,10 @@ class Config(object):
 class DevelopmentConfig(Config):
     """开发模式下的配置"""
     DEBUG = True
+    LOG_LEVEL = logging.DEBUG
 
 
 class ProductionConfig(Config):
     """生产模式下的配置"""
     DEBUG = False
+    LOG_LEVEL = logging.DEBUG
