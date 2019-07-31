@@ -1,5 +1,4 @@
 # 管理程序启动
-import logging
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from info import creat_app, db
@@ -16,17 +15,6 @@ Migrate(app, db)
 
 # 给Manager绑定迁移命令
 manager.add_command('db', MigrateCommand)
-
-
-@app.route('/')
-def hello_world():
-    logging.debug("this is debug")
-    logging.info("this is debug")
-    logging.warning("this is debug")
-    logging.error("this is debug")
-    logging.fatal("this is debug")
-    return 'hello world'
-
 
 if __name__ == '__main__':
     manager.run()

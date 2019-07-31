@@ -6,6 +6,7 @@ from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from logging.handlers import RotatingFileHandler
+from info.modules.index import index_blue
 
 # 创建数据库
 db = SQLAlchemy()
@@ -46,4 +47,6 @@ def creat_app(config_name):
     # 设置Flask_Session扩展，将存在浏览器的cookie中的session数据，同步到服务器的指定地址中(redis)
     Session(app)
 
+    # 注册蓝图对象
+    app.register_blueprint(index_blue)
     return app
