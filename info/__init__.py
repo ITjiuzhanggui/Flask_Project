@@ -6,10 +6,12 @@ from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from logging.handlers import RotatingFileHandler
-from info.modules.index import index_blue
 
 # 创建数据库
 db = SQLAlchemy()
+
+# 定义一个空redis存储对象
+redis_store = None
 
 
 def setup_log(config_name):
@@ -39,6 +41,7 @@ def creat_app(config_name):
     db.init_app(app)
 
     # 创建redis对象
+    global redis_store
     redis_store = redis.StrictRedis(host=config_name.REDIS_HOST, port=config_name.REDIS_PORT)
 
     # 开启CSRF保护---> 会启用csrf_token对比机制
@@ -46,6 +49,9 @@ def creat_app(config_name):
 
     # 设置Flask_Session扩展，将存在浏览器的cookie中的session数据，同步到服务器的指定地址中(redis)
     Session(app)
+
+    # 蓝图在用到的时候在导包，可以当作固定规则   
+    from info.modules.index import index_blue
 
     # 注册蓝图对象
     app.register_blueprint(index_blue)
