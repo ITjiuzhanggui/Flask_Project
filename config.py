@@ -30,4 +30,4 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """生产模式下的配置"""
     DEBUG = False
-    LOG_LEVEL = logging.DEBUG
+    LOG_LEVEL = logging.WARNING
