@@ -52,7 +52,13 @@ def creat_app(config_name):
 
     # 蓝图在用到的时候在导包，可以当作固定规则   
     from info.modules.index import index_blue
-
-    # 注册蓝图对象
+    # 注册(index)蓝图对象
     app.register_blueprint(index_blue)
+
+    from info.modules.passport import passport_blue
+    # 注册(passport)蓝图对象
+    app.register_blueprint(passport_blue)
+
     return app
+
+
