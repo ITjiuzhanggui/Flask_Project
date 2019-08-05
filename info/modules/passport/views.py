@@ -1,5 +1,5 @@
 # 2.1 导入蓝图对象
-from flask import request
+from flask import request, make_response
 
 from info import redis_store
 from . import passport_blue
@@ -23,4 +23,5 @@ def get_image_code():
     # 3.保存redis
     redis_store.set('ImageCodeID_' + image_code_id, image_code_id, 300)
     # 4.返回图像
+    response = make_response(image_data)
     return image_data
