@@ -1,5 +1,5 @@
 # 2.1 导入蓝图对象
-from flask import request, make_response, jsonify
+from flask import request, make_response, jsonify, current_app
 
 from info import redis_store
 from . import passport_blue
@@ -21,13 +21,19 @@ def get_image_code():
     # 2.生成验证码图像
     name, text, image_data = captcha.generate_captcha()
     # 3.保存redis
+
     try:
-        redis_store.set('ImageCodeID_' + image_code_id, image_code_id, 300)
-    except Exceptionas as e:
+        # 可以给redis增加类型注释来查看
+        redis_store.set('ImageCodeID_' + image_code_id, text, 300)
+    except Exception as e:
         # 保存日志
-        current_app.logger.rerror(e)
+        current_app.logger.error(e)
         # 返回json格式
-        return jsonify(error=4001, errmsg='保存redis出错')
+        # 如果要全局更新网页，可以渲染模版；
+        # 如果只是局部更新数据，前后端只需要使用json传输即可
+        # "{'errno':4001, 'errmsg': '保存redis出错'}"
+        return jsonify(errno=4001, errmsg='保存redis出错')
+
     # 4.返回图像
     response = make_response(image_data)
     response.headers['Content-Type'] = 'image/jpg'

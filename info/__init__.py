@@ -11,7 +11,7 @@ from logging.handlers import RotatingFileHandler
 db = SQLAlchemy()
 
 # 定义一个空redis存储对象
-redis_store = None
+redis_store = None  # type: redis.StrictRedis
 
 
 def setup_log(config_name):
