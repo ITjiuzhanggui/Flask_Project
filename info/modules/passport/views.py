@@ -1,5 +1,5 @@
 # 2.1 导入蓝图对象
-from flask import request, make_response
+from flask import request, make_response, jsonify
 
 from info import redis_store
 from . import passport_blue
@@ -21,7 +21,14 @@ def get_image_code():
     # 2.生成验证码图像
     name, text, image_data = captcha.generate_captcha()
     # 3.保存redis
-    redis_store.set('ImageCodeID_' + image_code_id, image_code_id, 300)
+    try:
+        redis_store.set('ImageCodeID_' + image_code_id, image_code_id, 300)
+    except Exceptionas as e:
+        # 保存日志
+        current_app.logger.rerror(e)
+        # 返回json格式
+        return jsonify(error=4001, errmsg='保存redis出错')
     # 4.返回图像
     response = make_response(image_data)
-    return image_data
+    response.headers['Content-Type'] = 'image/jpg'
+    return response
