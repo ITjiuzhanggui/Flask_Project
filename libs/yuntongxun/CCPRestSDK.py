@@ -16,6 +16,8 @@ import datetime
 from urllib import request as urllib2
 import json
 from .xmltojson import xmltojson
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 
 
 class REST:
@@ -123,7 +125,7 @@ class REST:
                 self.log(url, body, data)
             return {'172001': '网络错误'}
 
-    #  获取子帐号
+    # 获取子帐号
     # @param startNo  可选参数    开始的序号，默认从0开始
     # @param offset 可选参数     一次查询的最大条数，最小是1条，最大是100条
     def getSubAccounts(self, startNo, offset):
@@ -322,12 +324,13 @@ class REST:
             <playTimes>%s</playTimes><respUrl>%s</respUrl><userData>%s</userData><maxCallTime>%s</maxCallTime><speed>%s</speed>
             <volume>%s</volume><pitch>%s</pitch><bgsound>%s</bgsound></LandingCall>\
             ''' % (
-        to, mediaName, mediaTxt, self.AppId, displayNum, playTimes, respUrl, userData, maxCallTime, speed, volume,
-        pitch, bgsound)
-        if self.BodyType == 'json':
-            body = '''{"to": "%s", "mediaName": "%s","mediaTxt": "%s","appId": "%s","displayNum": "%s","playTimes": "%s","respUrl": "%s","userData": "%s","maxCallTime": "%s","speed": "%s","volume": "%s","pitch": "%s","bgsound": "%s"}''' % (
             to, mediaName, mediaTxt, self.AppId, displayNum, playTimes, respUrl, userData, maxCallTime, speed, volume,
             pitch, bgsound)
+        if self.BodyType == 'json':
+            body = '''{"to": "%s", "mediaName": "%s","mediaTxt": "%s","appId": "%s","displayNum": "%s","playTimes": "%s","respUrl": "%s","userData": "%s","maxCallTime": "%s","speed": "%s","volume": "%s","pitch": "%s","bgsound": "%s"}''' % (
+                to, mediaName, mediaTxt, self.AppId, displayNum, playTimes, respUrl, userData, maxCallTime, speed,
+                volume,
+                pitch, bgsound)
         req.data = body.encode()
         data = ''
         try:
@@ -386,7 +389,7 @@ class REST:
         if self.BodyType == 'json':
             # if this model is Json ..then do next code 
             body = '''{"appId": "%s", "verifyCode": "%s","playTimes": "%s","to": "%s","respUrl": "%s","displayNum": "%s","lang": "%s","userData": "%s"}''' % (
-            self.AppId, verifyCode, playTimes, to, respUrl, displayNum, lang, userData)
+                self.AppId, verifyCode, playTimes, to, respUrl, displayNum, lang, userData)
         req.data = body.encode()
         data = ''
         try:

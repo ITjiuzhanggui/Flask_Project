@@ -14,6 +14,48 @@ from info import constants
 
 
 # 2.2 使用蓝图对象实现路由
+# 注册用户
+# 请求方式:POST
+# URL:/register
+# 参数:mobile,sms_code,password
+@passport_blue.route('/register', methods=['POST'])
+def register():
+    """
+    1.获取参数(3)
+    2.校验参数(完整行，手机号)
+    3.从redis中获取短信验证码
+    4.对比验证码，对比失败返回信息
+    5.对比成功，删除短信验证码
+    6.成功注册用户(1.手机号是否注册过； 2.创建User对象；3.添加到mysql数据库)
+    7.设置用户登陆--->session
+    8.返回数据
+    """
+    # 一.获取数据
+    # 1.获取参数(3)
+    json_dict = request.json()
+    mobile = json_dict.get('mobile')
+    sms_code = json_dict.get('sms_code')
+    password = json_dict.get('password')
+
+    # 二.校验参数
+    # 2.校验参数(完整性，手机号)
+    if not all(mobile, sms_code, password):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数不全')
+
+    if not re.match('1[3456789][0-9]{9}', mobile):
+        # 如果不匹配
+        return jsonify(errno=RET.DATAERR, errmsg="手机号格式不正确")
+
+    # 三.逻辑处理
+    # 3.从redis中获取短信验证码
+    try:
+        real_sms_code = redis_store.get("SMS_" + mobile)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询数据库失败')
+
+    # 四.数据返回
+
 
 # 获取短信验证码
 # 请求方式post
@@ -41,7 +83,7 @@ def get_sms_code():
         return jsonify(errno=RET.DATAERR, errmsg='手机号格式不正确')
 
     # 三.逻辑处理
-    # 3.从redis获取图像验证码
+    # 3.从redis获取图像验证码models.py
     try:
         real_image_code = redis_store.get('ImageCodeTD_' + image_code_id)
 
@@ -69,13 +111,14 @@ def get_sms_code():
         current_app.logger.error(e)
         # 保存短信验证码失败
         return jsonify(errno=RET.DATAERR, errmsg="保存短信验证码失败")
-    # 7.调用云通讯发短信
-    result = CCP().send_template_sms(mobile, [sms_code_str, constants.SMS_TIME_DATE], 1)
-    if result != 0:
-        # 发送失败
-        return jsonify(errno=RET.THIRDERR, errmsg="发送短信验证码失败")
 
-    # 四.返回数据
+    # 7.调用云通讯发短信
+    # result = CCP().send_template_sms(mobile, [sms_code_str, constants.SMS_TIME_DATE], 1)
+    # if result != 0:
+    #     # 发送失败
+    #     return jsonify(errno=RET.THIRDERR, errmsg="发送短信验证码失败")
+    #
+    # # 四.返回数据
     return jsonify(errno=RET.OK, errmsg="发送短信验证码成功")
 
 

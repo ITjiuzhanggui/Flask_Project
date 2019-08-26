@@ -5,7 +5,8 @@ import logging
 
 class Config(object):
     # 配置SQLAlchemy
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:mysql@127.0.0.1/Flaks_Project'
+    "密码：password"
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:password@127.0.0.1/Flask_Project'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # 配置redis

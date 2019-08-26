@@ -42,10 +42,10 @@ def creat_app(config_name):
 
     # 创建redis对象
     global redis_store
-    redis_store = redis.StrictRedis(host=config_name.REDIS_HOST, port=config_name.REDIS_PORT)
+    redis_store = redis.StrictRedis(host=config_name.REDIS_HOST, port=config_name.REDIS_PORT, decode_responses=True)
 
     # 开启CSRF保护---> 会启用csrf_token对比机制
-    CSRFProtect(app)
+    # CSRFProtect(app)
 
     # 设置Flask_Session扩展，将存在浏览器的cookie中的session数据，同步到服务器的指定地址中(redis)
     Session(app)
