@@ -73,6 +73,11 @@ def register():
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='查询mysql的用户信息失败')
+
+    if user:
+        # 说明用户已经注册
+        return jsonify(errno=RET.DATAEXIST, errmsg='用户已经注册')
+
     # 6.2 创建User对象
     user = User()
     user.nick_name = mobile
