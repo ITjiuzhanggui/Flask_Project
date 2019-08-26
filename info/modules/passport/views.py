@@ -2,12 +2,13 @@
 import random
 import re
 
-from flask import request, make_response, jsonify, current_app
+from flask import request, make_response, jsonify, current_app, session
 from werkzeug.wrappers import json
 
-from info import redis_store
+from info import redis_store, db
+from info.models import User
 from info.utils.response_code import RET
-from libs.yuntongxun.sms import CCP
+from info.libs.yuntongxun.sms import CCP
 from . import passport_blue
 from info.utils.captcha.captcha import captcha
 from info import constants
@@ -26,7 +27,7 @@ def register():
     3.从redis中获取短信验证码
     4.对比验证码，对比失败返回信息
     5.对比成功，删除短信验证码
-    6.成功注册用户(1.手机号是否注册过； 2.创建User对象；3.添加到mysql数据库)
+    6.对比成功注册用户(1.手机号是否注册过； 2.创建User对象；3.添加到mysql数据库)
     7.设置用户登陆--->session
     8.返回数据
     """
@@ -53,8 +54,50 @@ def register():
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='查询数据库失败')
+    if not real_sms_code:
+        return jsonify(errno=RET.NODATA, errmsg='短信验证码过期或手机号填写错误')
+    # 4.对比验证码，对比失败返回信息
+    if real_sms_code != sms_code:
+        return jsonify(errno=RET.DATAERR, errmsg='短信验证码填写错误')
+    # 5.对比成功，删除短信验证码
+    try:
+        redis_store.delete('SMS_' + mobile)
+    except Exception as e:
+        current_app.logger.error(e)
+        # 从用户体验来说，如果出错了，可以不用返回JSON信息
+        # return jsonify(errno=RET.DBERR, errmsg='查询数据库失败')
+    # 6.对比成功注册用户(1.手机号是否注册过 2.创建User对象 3.添加到mysql数据库)
+    # 6.1 手机后是否注册过
+    try:
+        user = User.query.filter_by(mobile=mobile).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询mysql的用户信息失败')
+    # 6.2 创建User对象
+    user = User()
+    user.nick_name = mobile
+    user.nick_name = mobile
+    user.mobile = mobile
+    # TODO 需要对密码做加密处理
+    user.password_hash = password
 
-    # 四.数据返回
+    # 6.3添加到mysql数据库
+    try:
+        db.session.add()
+        db.session.commit()
+    except Exception as e:
+        # 数据的修改操作，失败了需要回滚
+        db.session.rollback()
+        current_app.logger().error(e)
+        return jsonify(errno=RET.DBERR, errmsg='添加mysql的用户信息失败')
+
+    # 7.设置用户登陆 -> session
+    session['user_id'] = user.id
+    session['nickname'] = user.nick_name
+    session['mobile'] = user.mobile
+
+    # 四.返回数据
+    return jsonify(errno=RET.OK, errmsg='注册成功')
 
 
 # 获取短信验证码
