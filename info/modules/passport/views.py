@@ -143,10 +143,31 @@ def get_sms_code():
     if not real_image_code:
         return jsonify(errno=RET.NODATA, errmsg='验证码已过期')
 
-    # 4.将2个数据进行对比，对比失败，返回JSON数据
+    # 4. 将2个数据进行对比，对比失败，返回JSON数据
+    # 4.1 为了完善逻辑--->图像验证码从redis获取之后就删除
+    try:
+        redis_store.delete('ImageCodeID_' + image_code_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        # 可删可不删
+        return jsonify(error=RET.DBERR, errmsg='redis删除失败')
+
+    # 4.2 对比redis和用户传入的数据
     if real_image_code.lower() != image_code.lower():
         # 对比失败，返回JSON数据
         return jsonify(errno=RET.DATAERR, errmsg="验证码填写错误")
+
+    # 4.3 图像验证码对比成功，再判断手机后是否注册过
+    try:
+        user = User.query.filter_by(mobile=mobile).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询mysql的用户信息失败')
+
+    if user:
+        # 说明用户已经注册
+        return jsonify(errno=RET.DATAEXIST, errmsg='用户已经注册')
+
     # 5.对比成功，生成短信验证码
     # '%06d':数字是6位的，不足以0补齐
     sms_code_str = '%06d' % random.ranint(0, 999999)
